@@ -56,7 +56,7 @@ function storeCustomer($customerInput){
 //400 Bad Request for invalid data, 422 Unprocessable Entity for data 
 
 
-//  for read or get api functions
+//  for read or get api functions to fetch data in list
 function getCustomerList(){
 
     global $conn;
@@ -98,7 +98,138 @@ function getCustomerList(){
 }
 
 
+//read01 to fetch data indiviually in row 
+function getCustomer($customerParams){
+    global $conn;
+    if($customerParams['id']==null){
+
+        return error422('Enter your customer id');
+
+    }
+    $customerId = mysqli_real_escape_string($conn, $customerParams['id']);
+    $query= "SELECT * from customers WHERE id='$customerId' LIMIT 1";
+    $result = mysqli_query($conn, $query);
+            if($result){
+                if (mysqli_num_rows($result)==1 ){
+                    $result=mysqli_fetch_assoc($result);
+
+                    $data=[
+                        'status' => 200,
+                        'message' =>'Customer Fetched successfully',
+                        'data'=> $result,
+                    ];
+                    header('HTTP/1.0 200 Success');
+                    return json_encode($data);
+
+            }
+            else{
+                $data=[
+                    'status' => 404,
+                    'message' =>'No customer Found',
+                ];
+                header('HTTP/1.0 404 Not Found');
+                return json_encode($data);
+
+            }
+        }
+    else{
+        $data=[
+            'status' => 500,
+            'message' =>'Internal Server Error',
+        ];
+        header('HTTP/1.0 500 internal server error');
+        return json_encode($data);
+
+    }
 
 
+}
+
+// function for  update or put
+
+function updateCustomer($customerInput,$customerParams){
+    global $conn;
+    if(!isset($customerParams['id'])){
+        return error422("customer id not found in url");
+
+    }elseif($customerParams['id'] == null){
+        return error422("Enter the customer id");
+    }
+    
+    $customerId= mysqli_real_escape_string($conn,$customerParams['id']);
+
+    $name= mysqli_real_escape_string($conn,$customerInput['name']);
+    $email= mysqli_real_escape_string($conn,$customerInput['email']);
+    $phone= mysqli_real_escape_string($conn,$customerInput['phone']);
+
+    if(empty(trim($name))){
+        return error422('Enter your name');//422 is for all input validations
+
+        }elseif(empty(trim($email))){
+            return error422('Enter your email');
+
+            }elseif(empty(trim($phone))){
+                return error422('Enter your phone no');
+            }
+            //start from here..
+            else{
+                $sql="UPDATE customers  SET name='$name',email='$email', phone='$phone' WHERE id='$customerId' LIMIT 1  ";
+                $result=mysqli_query($conn, $sql);
+                if($result){
+                    $data=[
+                        'status' => 200, // 200 means sucessfully upadated the record
+                        'message' =>'customer Updated successfully',
+                    ];
+                    header('HTTP/1.0 200 success');
+                    return json_encode($data);
+
+                }else{
+                    $data=[
+                        'status' => 500,
+                        'message' =>'Method Not Allowed',
+                    ];
+                    header('HTTP/1.0 500 internal server error');
+                    return json_encode($data);
+
+                }
+            }
+    }
+
+// function for  Delete Apis
+
+function deleteCustomer($customerParams){
+    global $conn;
+    if(!isset($customerParams['id'])){
+        return error422("customer id not found in url");
+
+    }elseif($customerParams['id'] == null){
+        return error422("Enter the customer id");
+    }
+    
+    $customerId= mysqli_real_escape_string($conn,$customerParams['id']);
+    $sql="DELETE FROM customers WHERE id='$customerId' LIMIT 1";
+    $result=mysqli_query($conn, $sql);
+    if($result){
+
+        $data=[
+            'status' => 200, //204 is for deleted function..
+            'message' =>'Customer deleted succesfully',
+        ];
+        header('HTTP/1.0 200 Deleted');
+        return json_encode($data);
+
+    }else{
+        $data=[
+            'status' => 404,
+            'message' =>'Customer Not Found',
+        ];
+        header('HTTP/1.0 404 internal server error');
+        return json_encode($data);
+    }
+
+    
+
+
+}
 
 ?>

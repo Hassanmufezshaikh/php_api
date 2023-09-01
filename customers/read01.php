@@ -1,8 +1,8 @@
 <?php 
 
 
-header('Access-Control-Allow-Origin:*'); // allowing requests from any origin to access this API
-// header('Content-Type:json');
+header('Access-Control-Allow-Origin:*'); 
+// allowing requests from any origin to access this API
 header('Content-Type: application\json');
 header('Access-control-Allow-Method:Get');
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-request-with');
@@ -11,9 +11,13 @@ include "function.php";
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 if($requestMethod =='GET'){
 
-    $customerList = getCustomerList();
-    echo $customerList;
-
+    if(isset($_GET['id'])){
+        $customer = getCustomer($_GET);
+        echo $customer;
+    }else{
+        $customerList = getCustomerList();
+        echo $customerList;
+    }
 }
 else{
     $data=[
@@ -22,6 +26,6 @@ else{
     ];
     header('HTTP/1.0 405 Method Not Allowed');
     echo json_encode($data);
-}
+}   
 
 ?>
